@@ -1,2 +1,0 @@
-A script that provides an interface to whatever package manager your system uses.
-Hopefully you won't have to do the mental check of "apt, yum, zyp, pkg, etc ..." and then remembering the correct command ever again.
