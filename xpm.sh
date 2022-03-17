@@ -4,6 +4,8 @@ xpm=""
 INSTALLED=~/.local/share/xpm/installed.txt
 
 installed_add() {
+	if [ $XPM_NOTRACK ]; then return; fi
+	
 	if [ ! -d $(dirname $INSTALLED) ]; then
 		mkdir -p $(dirname $INSTALLED)
 	fi
@@ -16,6 +18,8 @@ installed_add() {
 }
 
 installed_rm() {
+	if [ $XPM_NOTRACK ]; then return; fi
+
 	for pkg in $@; do
 		if [ "$(grep $pkg $INSTALLED)" != "" ]; then
 			sed -i "/$pkg/d" "$INSTALLED"
