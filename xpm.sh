@@ -10,20 +10,23 @@ track_installed_add() {
 		mkdir -p $(dirname $TRACK_INSTALLED_FILE)
 	fi
 
-	set_xpm_query
 	for pkg in $@; do
-		if [ -z $($xpm $pkg) ]; then
-			echo "$pkg was not installed"
+		if [ "$(grep $pkg $TRACK_INSTALLED_FILE)" = "" ]; then
+			echo $pkg >> "$TRACK_INSTALLED_FILE"
 		else
-			echo "$pkg" >> "$TRACK_INSTALLED_FILE"
+			echo "grep"
+			grep $pkg $TRACK_INSTALLED_FILE
 		fi
 	done
 }
 
 track_installed_rm() {
 	for pkg in $@; do
-		if [ -z $(command -v "$pkg") ]; then
+		if [ "$(grep $pkg $TRACK_INSTALLED_FILE)" != "" ]; then
 			sed -i "/$pkg/d" "$TRACK_INSTALLED_FILE"
+		else
+			echo "grep"
+			grep $pkg $TRACK_INSTALLED_FILE
 		fi
 	done
 }
@@ -35,16 +38,16 @@ unknown_pm() {
 }
 
 set_xpm_install() {
-		if [ $(command -v apt) ]; then xpm="apt install"
-		elif [ $(command -v zypper) ]; then xpm="zypper install"
-		elif [ $(command -v xbps-install) ]; then xpm="xbps-install -Rs"
+		if [ $(command -v apt) ]; then xpm="sudo apt install"
+		elif [ $(command -v zypper) ]; then xpm="sudo zypper install"
+		elif [ $(command -v xbps-install) ]; then xpm="sudo xbps-install -Rs"
 		else unknown_pm; fi
 }
 
 set_xpm_remove() {
-	if [ $(command -v apt) ]; then xpm="apt purge"
-	elif [ $(command -v zypper) ]; then xpm="zypper remove"
-	elif [ $(command -v xbps-remove) ]; then xpm="xbps-remove -R"
+	if [ $(command -v apt) ]; then xpm="sudo apt remove"
+	elif [ $(command -v zypper) ]; then xpm="sudo zypper remove"
+	elif [ $(command -v xbps-remove) ]; then xpm="sudo xbps-remove -R"
 	else unknown_pm; fi
 }
 
@@ -67,14 +70,12 @@ case "$1" in
 	"i"|"in"|"install")
 		shift
 		set_xpm_install
-		$xpm $@
-		if [ $? -eq 0 ]; then track_installed_add $@; fi
+		$xpm $@ && track_installed_add $@
 		;;
 	"r"|"rm"|"remove")
 		shift
 		set_xpm_remove
-		$xpm $@
-		if [ $? -eq 0 ]; then track_installed_rm $@; fi
+		$xpm $@ && track_installed_rm $@
 		;;
 	"s"|"se"|"search")
 		shift
