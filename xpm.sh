@@ -72,6 +72,16 @@ xpm_query() {
 	else unknown_pm; fi
 }
 
+xpm_update() {
+	if [ $(command -v apt) ]; then
+		sudo apt update && sudo apt upgrade
+	elif [ $(command -v zypper) ]; then
+		sudo zypper refresh && sudo zypper update
+	elif [ $(command -v xbps-install) ]; then
+		sudo xbps-install -Suv
+	else unknown_pm; fi
+}
+
 # main
 case "$1" in
 	"i"|"in"|"install")
@@ -89,5 +99,9 @@ case "$1" in
 	"q"|"qry"|"query")
 		shift
 		xpm_query $@
+		;;
+	"u"|"up"|"update")
+		shift
+		xpm_update
 		;;
 esac
