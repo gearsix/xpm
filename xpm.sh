@@ -3,6 +3,19 @@
 xpm=""
 INSTALLED=~/.local/share/xpm/installed.txt
 
+usage() {
+	echo "usage: xpm COMMAND [PKG ...]"
+	echo ""
+	echo "xpm - x package manager, an interface to the system package manager."
+	echo ""
+	echo "COMMAND"
+	echo "install    install all [PKG]"
+	echo "remove     uninstall all [PKG] (and uneeded dependencies)"
+	echo "search     search the repositories for [PKG]"
+	echo "query      query [PKG] to see if it's installed"
+	echo "update     update all packages on the system"
+}
+
 installed_add() {
 	if [ $XPM_NOTRACK ]; then return; fi
 	
@@ -104,4 +117,7 @@ case "$1" in
 		shift
 		xpm_update
 		;;
+	*)
+		usage
+		exit
 esac
