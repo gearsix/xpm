@@ -1,6 +1,7 @@
 #!/usr/bin/env sh
 
 xpm=""
+HOOKS_DIR=~/.config/xpm/hooks
 INSTALLED=~/.local/share/xpm/installed.txt
 
 usage() {
@@ -14,6 +15,21 @@ usage() {
 	echo "search     search the repositories for [PKG]"
 	echo "query      query [PKG] to see if it's installed"
 	echo "update     update all packages on the system"
+	echo ""
+	echo "See the README.md file for more details"
+}
+
+exec_hooks() {
+	if [ $1 = "" ]; then return; fi
+	
+	if [ ! -e $HOOKS_DIR ]; then mkdir -p $HOOKS_DIR; fi
+
+	for f in $HOOKS_DIR/*; do
+		if [ "$(basename $f)" = "$1" ]; then
+			echo "executing $f"
+			exec $f
+		fi
+	done
 }
 
 installed_add() {
@@ -46,18 +62,18 @@ unknown_pm() {
 }
 
 xpm_install() {
-		if [ $(command -v apt) ]; then
-			sudo apt install $@
-		elif [ $(command -v zypper) ]; then
-			sudo zypper install $@
-		elif [ $(command -v xbps-install) ]; then
-			sudo xbps-install -Rs $@
-		else unknown_pm; fi
+	if [ $(command -v apt) ]; then
+		sudo apt install $@
+	elif [ $(command -v zypper) ]; then
+		sudo zypper install $@
+	elif [ $(command -v xbps-install) ]; then
+		sudo xbps-install -Rs $@
+	else unknown_pm; fi
 }
 
 xpm_remove() {
 	if [ $(command -v apt) ]; then
-		sudo apt remove $@ && sudo apt autoremove -y
+		sudo apt remove $@
 	elif [ $(command -v zypper) ]; then
 		sudo zypper remove -u $@
 	elif [ $(command -v xbps-remove) ]; then
@@ -96,26 +112,31 @@ xpm_update() {
 }
 
 # main
-case "$1" in
+case "$1" in	
 	"i"|"in"|"install")
 		shift
 		xpm_install $@ && installed_add $@
+		exec_hooks install
 		;;
 	"r"|"rm"|"remove")
 		shift
 		xpm_remove $@ && installed_rm $@
+		exec_hooks remove
 		;;
 	"s"|"se"|"search")
 		shift
 		xpm_search $@
+		exec_hooks search
 		;;
 	"q"|"qry"|"query")
 		shift
 		xpm_query $@
+		exec_hooks query
 		;;
 	"u"|"up"|"update")
 		shift
 		xpm_update
+		exec_hooks update
 		;;
 	*)
 		usage

@@ -7,13 +7,6 @@ A sh script to provide a generic interface to whatever package manager your syst
 The goal of this project is to avoid the requirement for doing the mental check required when interfacing with your systems package manager, useful if you hop between systems frequently.
 
 
-## configure
-
-It also tracks installed/uninstalled packages (only what you've requested for install, not including its dependencies) in `~/.local/share/xpm/installed.txt`.
-
-Tracking installed packages can be disabled by setting *XPM_NOTRACK* to 1, either in your environment.
-
-
 ## install
 
 `install ./xpm.sh [INSTALL DIR]/xpm`
@@ -24,9 +17,21 @@ Tracking installed packages can be disabled by setting *XPM_NOTRACK* to 1, eithe
 - *~/.local/bin*
 
 
-## notes
+## configure
 
-- Add hooking (á la githooks)
+**tracking**
+
+xpm keeps track of installed/uninstalled packages (only what you've requested for install, not including its dependencies) in `~/.local/share/xpm/installed.txt`.
+
+This behaviour can be disabled by setting *XPM_NOTRACK* to 1, either in your environment.
+
+**hooks**
+
+xpm supports 'hooks' (inspired by git-hooks). A 'hook' is a script that gets executed *after* running the specified command.
+
+All you need to do is add the script file to execute in `~/.config/xpm/hooks` and make sure it's executable.
+
+This is useful if you install package outside of the package manager that require a seperate command to execute, or if you want to add additional behaviour to the default xpm commands.
 
 
 ## authors
