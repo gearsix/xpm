@@ -73,7 +73,7 @@ xpm_install() {
 
 xpm_remove() {
 	if [ $(command -v apt) ]; then
-		sudo apt remove $@
+		sudo apt purge $@
 	elif [ $(command -v zypper) ]; then
 		sudo zypper remove -u $@
 	elif [ $(command -v xbps-remove) ]; then
