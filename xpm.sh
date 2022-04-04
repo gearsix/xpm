@@ -22,7 +22,7 @@ usage() {
 exec_hooks() {
 	if [ $1 = "" ]; then return; fi
 	
-	if [ ! -e $HOOKS_DIR ]; then mkdir -p $HOOKS_DIR; fi
+	if [ ! -d $HOOKS_DIR ]; then mkdir -p $HOOKS_DIR; fi
 
 	for f in $HOOKS_DIR/*; do
 		if [ "$(basename $f)" = "$1" ]; then
@@ -39,6 +39,10 @@ installed_add() {
 		mkdir -p $(dirname $INSTALLED)
 	fi
 
+	if [ ! -e $INSTALLED ]; then
+		touch $INSTALLED
+	fi
+
 	for pkg in $@; do
 		if [ "$(grep $pkg $INSTALLED)" = "" ]; then
 			echo $pkg >> "$INSTALLED"
@@ -49,11 +53,13 @@ installed_add() {
 installed_rm() {
 	if [ $XPM_NOTRACK ]; then return; fi
 
-	for pkg in $@; do
-		if [ "$(grep $pkg $INSTALLED)" != "" ]; then
-			sed -i "/$pkg/d" "$INSTALLED"
-		fi
-	done
+	if [ -e $INSTALLED ]; then
+		for pkg in $@; do
+			if [ "$(grep $pkg $INSTALLED)" != "" ]; then
+				sed -i "/$pkg/d" "$INSTALLED"
+			fi
+		done
+	fi
 }
 
 unknown_pm() {
