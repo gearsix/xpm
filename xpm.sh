@@ -94,6 +94,8 @@ xpm_search() {
 		zypper search $@
 	elif [ $(command -v xbps-query) ]; then
 		xbps-query -Rs $@
+	elif [ $(command -v brew) ]; then
+		brew install $@
 	else unknown_pm; fi
 }
 
@@ -104,6 +106,8 @@ xpm_query() {
 		zypper search --installed-only $@
 	elif [ $(command -v xbps-query) ]; then
 		xbps-query -S $@
+	elif [ $(command -v brew) ]; then
+		brew search $@
 	else unknown_pm; fi
 }
 
@@ -114,6 +118,8 @@ xpm_update() {
 		sudo zypper refresh && sudo zypper update
 	elif [ $(command -v xbps-install) ]; then
 		sudo xbps-install -Suv
+	elif [ $(command -v brew) ]; then
+		brew update
 	else unknown_pm; fi
 }
 
