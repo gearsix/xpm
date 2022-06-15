@@ -1,6 +1,5 @@
 #!/usr/bin/env sh
 
-xpm=""
 HOOKS_DIR=~/.config/xpm/hooks
 INSTALLED=~/.local/share/xpm/installed.txt
 
@@ -20,42 +19,42 @@ usage() {
 }
 
 exec_hooks() {
-	if [ $1 = "" ]; then return; fi
+	if [ "$1" = "" ]; then return; fi
 	
-	if [ ! -d $HOOKS_DIR ]; then mkdir -p $HOOKS_DIR; fi
+	if [ ! -d "$HOOKS_DIR" ]; then mkdir -p $HOOKS_DIR; fi
 
-	for f in $HOOKS_DIR/*; do
-		if [ "$(basename $f)" = "$1" ]; then
+	for f in "$HOOKS_DIR"/*; do
+		if [ "$(basename "$f")" = "$1" ]; then
 			echo "executing $f"
-			exec $f
+			exec "$f"
 		fi
 	done
 }
 
 installed_add() {
-	if [ $XPM_NOTRACK ]; then return; fi
+	if [ "$XPM_NOTRACK" ]; then return; fi
 	
-	if [ ! -d $(dirname $INSTALLED) ]; then
-		mkdir -p $(dirname $INSTALLED)
+	if [ ! -d "$(dirname $INSTALLED)" ]; then
+		mkdir -p "$(dirname $INSTALLED)"
 	fi
 
 	if [ ! -e $INSTALLED ]; then
 		touch $INSTALLED
 	fi
 
-	for pkg in $@; do
-		if [ "$(grep $pkg $INSTALLED)" = "" ]; then
-			echo $pkg >> "$INSTALLED"
+	for pkg in "$@"; do
+		if [ "$(grep "$pkg" $INSTALLED)" = "" ]; then
+			echo "$pkg" >> "$INSTALLED"
 		fi
 	done
 }
 
 installed_rm() {
-	if [ $XPM_NOTRACK ]; then return; fi
+	if [ "$XPM_NOTRACK" ]; then return; fi
 
 	if [ -e $INSTALLED ]; then
-		for pkg in $@; do
-			if [ "$(grep $pkg $INSTALLED)" != "" ]; then
+		for pkg in "$@"; do
+			if [ "$(grep "$pkg" $INSTALLED)" != "" ]; then
 				sed -i "/$pkg/d" "$INSTALLED"
 			fi
 		done
@@ -68,57 +67,57 @@ unknown_pm() {
 }
 
 xpm_install() {
-	if [ $(command -v apt) ]; then
-		sudo apt install $@
-	elif [ $(command -v zypper) ]; then
-		sudo zypper install $@
-	elif [ $(command -v xbps-install) ]; then
-		sudo xbps-install -Rs $@
+	if [ "$(command -v apt)" ]; then
+		sudo apt install "$@"
+	elif [ "$(command -v zypper)" ]; then
+		sudo zypper install "$@"
+	elif [ "$(command -v xbps-install)" ]; then
+		sudo xbps-install -Rs "$@"
 	else unknown_pm; fi
 }
 
 xpm_remove() {
-	if [ $(command -v apt) ]; then
-		sudo apt purge $@
-	elif [ $(command -v zypper) ]; then
-		sudo zypper remove -u $@
-	elif [ $(command -v xbps-remove) ]; then
-		sudo xbps-remove -R $@
+	if [ "$(command -v apt)" ]; then
+		sudo apt purge "$@"
+	elif [ "$(command -v zypper)" ]; then
+		sudo zypper remove -u "$@"
+	elif [ "$(command -v xbps-remove)" ]; then
+		sudo xbps-remove -R "$@"
 	else unknown_pm; fi
 }
 
 xpm_search() {
-	if [ $(command -v apt) ]; then
-		apt search $@
-	elif [ $(command -v zypper) ]; then
-		zypper search $@
-	elif [ $(command -v xbps-query) ]; then
-		xbps-query -Rs $@
-	elif [ $(command -v brew) ]; then
-		brew install $@
+	if [ "$(command -v apt)" ]; then
+		apt search "$@"
+	elif [ "$(command -v zypper)" ]; then
+		zypper search "$@"
+	elif [ "$(command -v xbps-query)" ]; then
+		xbps-query -Rs "$@"
+	elif [ "$(command -v brew)" ]; then
+		brew install "$@"
 	else unknown_pm; fi
 }
 
 xpm_query() {
-	if [ $(command -v apt) ]; then
-		apt list --installed $@
-	elif [ $(command -v zypper) ]; then
-		zypper search --installed-only $@
-	elif [ $(command -v xbps-query) ]; then
-		xbps-query -S $@
-	elif [ $(command -v brew) ]; then
-		brew search $@
+	if [ "$(command -v apt)" ]; then
+		apt list --installed "$@"
+	elif [ "$(command -v zypper)" ]; then
+		zypper search --installed-only "$@"
+	elif [ "$(command -v xbps-query)" ]; then
+		xbps-query -S "$@"
+	elif [ "$(command -v brew)" ]; then
+		brew search "$@"
 	else unknown_pm; fi
 }
 
 xpm_update() {
-	if [ $(command -v apt) ]; then
+	if [ "$(command -v apt)" ]; then
 		sudo apt update && sudo apt upgrade
-	elif [ $(command -v zypper) ]; then
+	elif [ "$(command -v zypper)" ]; then
 		sudo zypper refresh && sudo zypper update
-	elif [ $(command -v xbps-install) ]; then
+	elif [ "$(command -v xbps-install)" ]; then
 		sudo xbps-install -Suv
-	elif [ $(command -v brew) ]; then
+	elif [ "$(command -v brew)" ]; then
 		brew update
 	else unknown_pm; fi
 }
@@ -127,22 +126,22 @@ xpm_update() {
 case "$1" in	
 	"i"|"in"|"install")
 		shift
-		xpm_install $@ && installed_add $@
+		xpm_install "$@" && installed_add "$@"
 		exec_hooks install
 		;;
 	"r"|"rm"|"remove")
 		shift
-		xpm_remove $@ && installed_rm $@
+		xpm_remove "$@" && installed_rm "$@"
 		exec_hooks remove
 		;;
 	"s"|"se"|"search")
 		shift
-		xpm_search $@
+		xpm_search "$@"
 		exec_hooks search
 		;;
 	"q"|"qry"|"query")
 		shift
-		xpm_query $@
+		xpm_query "$@"
 		exec_hooks query
 		;;
 	"u"|"up"|"update")
