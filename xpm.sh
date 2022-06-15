@@ -1,8 +1,10 @@
 #!/usr/bin/env sh
 
+pm=""
 HOOKS_DIR=~/.config/xpm/hooks
 INSTALLED=~/.local/share/xpm/installed.txt
 
+# misc
 usage() {
 	echo "usage: xpm COMMAND [PKG ...]"
 	echo ""
@@ -18,6 +20,7 @@ usage() {
 	echo "See the README.md file for more details"
 }
 
+# hooks
 exec_hooks() {
 	if [ "$1" = "" ]; then return; fi
 	
@@ -31,6 +34,7 @@ exec_hooks() {
 	done
 }
 
+# installed list
 installed_add() {
 	if [ "$XPM_NOTRACK" ]; then return; fi
 	
@@ -61,68 +65,82 @@ installed_rm() {
 	fi
 }
 
+# identify the package manager
+identify_pm() {
+	if [ "$(command -v apt)" ] && [ "$(command -v apt-get)" ]; then
+		pm="apt"
+	elif [ "$(command -v zypper)" ]; then
+		pm="zypper"
+	elif [ "$(command -v xbps-install)" ]; then
+		pm="xbps"
+	elif [ "$(command -v brew)" ]; then
+		pm="homebrew"
+	else
+		unknown_pm
+	fi
+}
+
 unknown_pm() {
-	echo "unknown package manager"
+	echo "unknown package manager!"
+	echo "  The package manager for your system could not be recognised."
+	echo "  If you're using a stanadard package manager, report it to the dev so he can add support."
 	exit
 }
 
+# xpm commands
 xpm_install() {
-	if [ "$(command -v apt)" ]; then
-		sudo apt install "$@"
-	elif [ "$(command -v zypper)" ]; then
-		sudo zypper install "$@"
-	elif [ "$(command -v xbps-install)" ]; then
-		sudo xbps-install -Rs "$@"
-	else unknown_pm; fi
+	case $pm in
+		"apt") sudo apt install "$@" ;;
+		"zypper") sudo zypper install "$@" ;;
+		"xbps") sudo xbps-install "$@" ;;
+		"homebrew") brew install "$@" ;;
+		*) unknown_pm ;;
+	esac
 }
 
 xpm_remove() {
-	if [ "$(command -v apt)" ]; then
-		sudo apt purge "$@"
-	elif [ "$(command -v zypper)" ]; then
-		sudo zypper remove -u "$@"
-	elif [ "$(command -v xbps-remove)" ]; then
-		sudo xbps-remove -R "$@"
-	else unknown_pm; fi
+	case $pm in
+		"apt") sudo apt purge "$@" ;;
+		"zypper") sudo zypper remove -u "$@" ;;
+		"xbps") sudo xbps-remove -R "$@" ;;
+		"homebrew") brew uninstall "$@" ;;
+		*) unknown_pm ;;
+	esac
 }
 
 xpm_search() {
-	if [ "$(command -v apt)" ]; then
-		apt search "$@"
-	elif [ "$(command -v zypper)" ]; then
-		zypper search "$@"
-	elif [ "$(command -v xbps-query)" ]; then
-		xbps-query -Rs "$@"
-	elif [ "$(command -v brew)" ]; then
-		brew install "$@"
-	else unknown_pm; fi
+	case $pm in
+		"apt") apt search "$@" ;;
+		"zypper") zypper search "$@" ;;
+		"xbps") xbps-query -Rs "$@" ;;
+		"homebrew") brew search "$@" ;;
+		*) unknown_pm ;;
+	esac
 }
 
 xpm_query() {
-	if [ "$(command -v apt)" ]; then
-		apt list --installed "$@"
-	elif [ "$(command -v zypper)" ]; then
-		zypper search --installed-only "$@"
-	elif [ "$(command -v xbps-query)" ]; then
-		xbps-query -S "$@"
-	elif [ "$(command -v brew)" ]; then
-		brew search "$@"
-	else unknown_pm; fi
+	case $pm in
+		"apt") apt list --installed "$@" ;;
+		"zypper") zypper search --installed-only "$@" ;;
+		"xbps") xbps-query -S "$@" ;;
+		"homebrew") brew list "$@" ;;
+		*) unknown_pm ;;
+	esac
 }
 
 xpm_update() {
-	if [ "$(command -v apt)" ]; then
-		sudo apt update && sudo apt upgrade
-	elif [ "$(command -v zypper)" ]; then
-		sudo zypper refresh && sudo zypper update
-	elif [ "$(command -v xbps-install)" ]; then
-		sudo xbps-install -Suv
-	elif [ "$(command -v brew)" ]; then
-		brew update
-	else unknown_pm; fi
+	case $pm in
+		"apt") sudo apt update && sudo apt upgrade ;;
+		"zypper") sudo zypper refresh && sudo zypper update ;;
+		"xbps") sudo xbps-install -Suv ;;
+		"homebrew") brew update && brew upgrade ;;
+		*) unknown_pm ;;
+	esac
 }
 
 # main
+identify_pm
+
 case "$1" in	
 	"i"|"in"|"install")
 		shift
