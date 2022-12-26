@@ -2,7 +2,6 @@
 
 pm=""
 HOOKS_DIR=~/.config/xpm/hooks
-INSTALLED=~/.local/share/xpm/installed.txt
 
 # misc
 usage() {
@@ -15,6 +14,7 @@ usage() {
 	echo "remove,  re,  r    uninstall all [PKG] (and dependencies)"
 	echo "search,  se,  s    search the repositories for [PKG]"
 	echo "query,   qry, q    query [PKG] to see if it's installed"
+	echo "list,    ls,  l    list installed files"
 	echo "update,  up,  u    update all packages on the system"
 	echo ""
 	echo "See the README.md file for more details"
@@ -38,16 +38,16 @@ exec_hooks() {
 installed_add() {
 	if [ "$XPM_NOTRACK" ]; then return; fi
 	
-	if [ ! -d "$(dirname $INSTALLED)" ]; then
-		mkdir -p "$(dirname $INSTALLED)"
+	if [ ! -d "$(dirname "$INSTALLED")" ]; then
+		mkdir -p "$(dirname "$INSTALLED")"
 	fi
 
-	if [ ! -e $INSTALLED ]; then
-		touch $INSTALLED
+	if [ ! -e "$INSTALLED" ]; then
+		touch "$INSTALLED"
 	fi
 
 	for pkg in "$@"; do
-		if [ "$(grep "$pkg" $INSTALLED)" = "" ]; then
+		if [ "$(grep "$pkg" "$INSTALLED")" = "" ]; then
 			echo "$pkg" >> "$INSTALLED"
 		fi
 	done
@@ -56,9 +56,9 @@ installed_add() {
 installed_rm() {
 	if [ "$XPM_NOTRACK" ]; then return; fi
 
-	if [ -e $INSTALLED ]; then
+	if [ -e "$INSTALLED" ]; then
 		for pkg in "$@"; do
-			if [ "$(grep "$pkg" $INSTALLED)" != "" ]; then
+			if [ "$(grep "$pkg" "$INSTALLED")" != "" ]; then
 				sed -i "/$pkg/d" "$INSTALLED"
 			fi
 		done
@@ -128,6 +128,14 @@ xpm_query() {
 	esac
 }
 
+xpm_list() {
+	case $pm in
+		"apt") apt list --installed ;;
+		"homebrew") brew leaves ;;
+		*) unknown_pm ;;
+	esac
+}
+
 xpm_update() {
 	case $pm in
 		"apt") sudo apt update && sudo apt upgrade ;;
@@ -161,6 +169,11 @@ case "$1" in
 		shift
 		xpm_query "$@"
 		exec_hooks query
+		;;
+	"l"|"ls"|"list")
+		shift
+		xpm_list "$@"
+		exec_hooks list
 		;;
 	"u"|"up"|"update")
 		shift
