@@ -13,8 +13,8 @@ usage() {
 	echo "install, in,  i    install all [PKG]"
 	echo "remove,  re,  r    uninstall all [PKG] (and dependencies)"
 	echo "search,  se,  s    search the repositories for [PKG]"
-	echo "query,   qry, q    query [PKG] to see if it's installed"
-	echo "list,    ls,  l    list installed files"
+	echo "query,   qry, q    query [PKG] for information"
+	echo "list,    ls,  l    list installed files for [PKG]"
 	echo "update,  up,  u    update all packages on the system"
 	echo ""
 	echo "See the README.md file for more details"
@@ -120,18 +120,20 @@ xpm_search() {
 
 xpm_query() {
 	case $pm in
-		"apt") apt list --installed "$@" ;;
-		"zypper") zypper search --installed-only "$@" ;;
-		"xbps") xbps-query -S "$@" ;;
-		"homebrew") brew list "$@" ;;
+		"apt") apt show "$@" ;;
+		"zypper") zypper info "$@" ;;
+		"xbps") xbps-query -RS "$@" ;;
+		"homebrew") brew info "$@" ;;
 		*) unknown_pm ;;
 	esac
 }
 
 xpm_list() {
 	case $pm in
-		"apt") apt list --installed ;;
-		"homebrew") brew leaves ;;
+		"apt") apt list --installed "$@" ;;
+		"zypper") zypper search --installed-only "$@" ;;
+		"xbps") xbps-query -S "$@" ;;
+		"homebrew") brew list "$@" ;;
 		*) unknown_pm ;;
 	esac
 }
@@ -149,34 +151,30 @@ xpm_update() {
 # main
 identify_pm
 
-case "$1" in	
+cmd="$1"; shift
+
+case "$cmd" in	
 	"i"|"in"|"install")
-		shift
 		xpm_install "$@" && installed_add "$@"
 		exec_hooks install
 		;;
 	"r"|"rm"|"remove")
-		shift
 		xpm_remove "$@" && installed_rm "$@"
 		exec_hooks remove
 		;;
 	"s"|"se"|"search")
-		shift
 		xpm_search "$@"
 		exec_hooks search
 		;;
 	"q"|"qry"|"query")
-		shift
 		xpm_query "$@"
 		exec_hooks query
 		;;
 	"l"|"ls"|"list")
-		shift
 		xpm_list "$@"
 		exec_hooks list
 		;;
 	"u"|"up"|"update")
-		shift
 		xpm_update
 		exec_hooks update
 		;;
