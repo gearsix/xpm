@@ -34,37 +34,6 @@ exec_hooks() {
 	done
 }
 
-# installed list
-installed_add() {
-	if [ "$XPM_NOTRACK" ]; then return; fi
-	
-	if [ ! -d "$(dirname "$INSTALLED")" ]; then
-		mkdir -p "$(dirname "$INSTALLED")"
-	fi
-
-	if [ ! -e "$INSTALLED" ]; then
-		touch "$INSTALLED"
-	fi
-
-	for pkg in "$@"; do
-		if [ "$(grep "$pkg" "$INSTALLED")" = "" ]; then
-			echo "$pkg" >> "$INSTALLED"
-		fi
-	done
-}
-
-installed_rm() {
-	if [ "$XPM_NOTRACK" ]; then return; fi
-
-	if [ -e "$INSTALLED" ]; then
-		for pkg in "$@"; do
-			if [ "$(grep "$pkg" "$INSTALLED")" != "" ]; then
-				sed -i "/$pkg/d" "$INSTALLED"
-			fi
-		done
-	fi
-}
-
 # identify the package manager
 identify_pm() {
 	if [ "$(command -v apt)" ] && [ "$(command -v apt-get)" ]; then
@@ -155,11 +124,11 @@ cmd="$1"; shift
 
 case "$cmd" in	
 	"i"|"in"|"install")
-		xpm_install "$@" && installed_add "$@"
+		xpm_install "$@"
 		exec_hooks install
 		;;
 	"r"|"rm"|"remove")
-		xpm_remove "$@" && installed_rm "$@"
+		xpm_remove "$@"
 		exec_hooks remove
 		;;
 	"s"|"se"|"search")
