@@ -1,7 +1,9 @@
 #!/usr/bin/env sh
 
 pm=""
+
 HOOKS_DIR=~/.config/xpm/hooks
+if [ "$(uname)" = "Darwin" ]; then HOOKS_DIR=~/Library/Application Support/xpm/hooks; fi
 
 # misc
 usage() {
