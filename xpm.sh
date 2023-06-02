@@ -122,7 +122,9 @@ xpm_update() {
 # main
 identify_pm
 
-cmd="$1"; shift
+cmd="$1";
+
+if [ "$cmd" != "" ]; then shift; fi
 
 case "$cmd" in	
 	"i"|"in"|"install")
