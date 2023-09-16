@@ -1,4 +1,3 @@
-# xpm
 
 **x package manager**
 
